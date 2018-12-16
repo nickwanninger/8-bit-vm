@@ -1,3 +1,6 @@
 default:
-	clang -o 8bvm vm.c
-	clang -o 8bc compile.c
+	clang -o run src/run.c
+	clang -o compile src/compile.c
+
+clean:
+	rm -rf run compile
