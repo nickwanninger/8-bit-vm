@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make
-cat test.asm | ./compile | ./run
+cat example.8b | ./compile | ./run
