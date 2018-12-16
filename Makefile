@@ -1,6 +1,6 @@
 default:
-	clang -o run src/run.c
-	clang -o compile src/compile.c
+	clang -g -o run src/run.c
+	clang -g -o compile src/compile.c
 
 clean:
 	rm -rf run compile

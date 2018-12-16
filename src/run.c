@@ -1,11 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "instructions.h"
 
 #define STACK_SIZE 255
 #define HEAP_SIZE 255
 #define REG_COUNT 8
-int main() {
+
+
+int run(FILE *in, FILE *out);
+char *run_err = NULL;
+
+
+int main(int argc, char **argv) {
 
 
 	uint8_t code[] = {
@@ -25,16 +32,56 @@ int main() {
 		HALT,
 	};
 
+	FILE *in = stdin;
+
+	if (run(in, stdout)) {
+		fprintf(stderr, "Run Error: %s\n", run_err);
+		exit(-1);
+	}
+
+
+	return 0;
+}
+
+
+int run(FILE *in, FILE *out) {
+	// the first thing we need to do is load the file into memory entirely.
+	// this is so the interpreter can jump around the code quickly
+	uint8_t *code;
+	fseek(in, 0, SEEK_END);
+	uint32_t codesize = ftell(in);
+	fseek(in, 0, SEEK_SET);
+
+	code = calloc(1, codesize);
+	fread(code, codesize, 1, in);
+	fclose(in);
+
+
+	if (codesize < sizeof(uint8_t*)) {
+		run_err = "bytecode contained no main byte marker";
+		return 1;
+	}
+
+	// so the first thing we need to do is load a 64
+	// bit number from the code, because the bytecode
+	// stores the starting value for the instruction
+	// pointer at the beginning of the file
+	// this is essentially the "main" function
+	uint8_t *ip = code + sizeof(uint8_t*) + *(uint64_t*)(void*)(code);
+
+	// shift the pointer to the code
+	code += sizeof(uint8_t*);
+	codesize -= sizeof(uint8_t*);
+
 
 	printf("code: ");
-	for (int i = 0; i < sizeof(code); i++) {
+	for (int i = 0; i < codesize; i++) {
 		printf("%02x ", code[i]);
 	}
 	printf("\n");
 	// the instruction pointer
 	// is started out at the first
 	// byte byte
-	uint8_t *ip = code;
 
 	uint8_t *stack = calloc(1, STACK_SIZE);
 	uint8_t *sp = stack;
@@ -170,5 +217,7 @@ int main() {
 	fprintf(stderr, "exiting erroneously\n");
 	free(registers);
 	free(stack);
-	return 1;
+
+	free(code);
+	return 0; // no error
 }

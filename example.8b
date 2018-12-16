@@ -1,8 +1,18 @@
 main:
-	CONST 2
+	CONST 6
 	CONST 2
 	MULT
-	STOREI 0
-	LOADI 0
-	PRINT
+	POP 0
+	PUSH 0
+	STOREI 1
+	LOADI 1
+
+	CONST 10
+	CONST 255
+	POP 4
+	STORE 4
+	HALT
+
+
+something:
 	HALT
